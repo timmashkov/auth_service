@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
+from uuid import UUID
 
-from sqlalchemy import String
+from sqlalchemy import String, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -19,6 +20,10 @@ class Role(Base):
         JSONB, server_default="{}", default={}, comment="Дополнительные данные"
     )
 
+    user_uuid: Mapped[UUID] = mapped_column(
+        ForeignKey("users.uuid", ondelete="CASCADE"), unique=True, nullable=True
+    )
+
     user_link: Mapped["User"] = relationship(
         "User",
         back_populates="user_role",
@@ -27,7 +32,7 @@ class Role(Base):
 
     role_permissions: Mapped["Permission"] = relationship(
         "Permission",
-        back_populates="roles",
+        back_populates="role",
         lazy="noload",
         cascade="all, delete-orphan",
         passive_updates=True,

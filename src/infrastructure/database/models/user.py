@@ -29,11 +29,11 @@ class User(Base):
         nullable=False,
     )
 
-    profile: Mapped["Profile"] = relationship(
-        "Profile",
-        backref="user",
-        lazy="noload",
-    )
+    # profile: Mapped["Profile"] = relationship(
+    #     "Profile",
+    #     backref="user",
+    #     lazy="noload",
+    # )
 
     user_role: Mapped["Role"] = relationship(
         "Role",

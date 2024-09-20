@@ -42,12 +42,12 @@ class Profile(Base):
         ForeignKey("users.uuid", ondelete="CASCADE"), unique=True, nullable=True
     )
 
-    user: Mapped["User"] = relationship(
-        "User",
-        backref="profile",
-        lazy="noload",
-        cascade="all, delete-orphan",
-        passive_updates=True,
-        passive_deletes=True,
-        single_parent=True,
-    )
+    # user: Mapped["User"] = relationship(
+    #     "User",
+    #     backref="profile",
+    #     lazy="noload",
+    #     cascade="all, delete-orphan",
+    #     passive_updates=True,
+    #     passive_deletes=True,
+    #     single_parent=True,
+    # )
