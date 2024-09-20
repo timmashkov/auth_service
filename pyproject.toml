@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "auth-service"
+version = "0.0.1"
+description = "register\\auth service"
+authors = ["timmashkov <bodomizer@yandex.ru>"]
+license = "Home"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.0"
+uvicorn = "^0.30.6"
+SQLAlchemy = "^2.0.35"
+asyncpg = "^0.29.0"
+alembic = "^1.13.2"
+flake8 = "^7.1.1"
+isort = "^5.13.2"
+black = "^24.8.0"
+orjson = "^3.10.7"
+dynaconf = "^3.2.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
