@@ -4,7 +4,7 @@ statistics = True
 count = True
 no-accept-encodings = True
 extend-ignore = E203, P103, A005, A001, A003
-exclude = alembic
+exclude = migrations
 
 commas-extra-whitespace = False
 debugger-max-variable-length = 30

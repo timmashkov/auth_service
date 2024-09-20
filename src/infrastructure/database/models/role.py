@@ -1,13 +1,36 @@
-from sqlalchemy import Boolean, Integer, String
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from typing import TYPE_CHECKING
 
-from infrastructure.base_entities.base_table import Base
+from sqlalchemy import String
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from infrastructure.database.models.base import Base
+
+if TYPE_CHECKING:
+    from infrastructure.database.models.permission import Permission
+    from infrastructure.database.models.user import User
 
 
 class Role(Base):
 
     name: Mapped[str] = mapped_column(String, unique=True, comment="Название")
+
     jdata: Mapped[dict] = mapped_column(
         JSONB, server_default="{}", default={}, comment="Дополнительные данные"
+    )
+
+    user_link: Mapped["User"] = relationship(
+        "User",
+        back_populates="user_role",
+        lazy="noload",
+    )
+
+    role_permissions: Mapped["Permission"] = relationship(
+        "Permission",
+        back_populates="roles",
+        lazy="noload",
+        cascade="all, delete-orphan",
+        passive_updates=True,
+        passive_deletes=True,
+        single_parent=True,
     )
