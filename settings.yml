@@ -19,3 +19,11 @@ default:
     pool_max_size: 20
     pool_timeout: 90
     mat_view_time: 15
+  AUTH:
+    SECRET: secret
+    EXPIRATION: 3600
+    ITERATIONS: 1000
+    HASH_NAME: sha256
+    FORMATS: utf-8
+    ALGORYTHM: HS256
+    API_X_KEY_HEADER: key

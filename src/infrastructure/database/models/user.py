@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Integer, String
+from sqlalchemy import Boolean, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from infrastructure.database.models.base import Base
@@ -12,14 +12,31 @@ if TYPE_CHECKING:
 class User(Base):
 
     nickname: Mapped[str] = mapped_column(
-        String, unique=True, nullable=True, comment=""
+        String, unique=True, nullable=True,
     )
-    first_name: Mapped[str] = mapped_column(String, nullable=False, comment="")
-    last_name: Mapped[str] = mapped_column(String, nullable=False, comment="")
-    patronymic: Mapped[str] = mapped_column(String, nullable=False, comment="")
+    login: Mapped[str] = mapped_column(
+        String(20),
+        unique=True,
+        nullable=False,
+    )
+    password: Mapped[str] = mapped_column(
+        Text,
+        unique=False,
+        nullable=False,
+    )
+    email: Mapped[str] = mapped_column(
+        String(50),
+        unique=True,
+        nullable=False,
+    )
     age: Mapped[int] = mapped_column(
         Integer,
         unique=False,
+        nullable=False,
+    )
+    phone_number: Mapped[str] = mapped_column(
+        String(11),
+        unique=True,
         nullable=False,
     )
     is_verified: Mapped[bool] = mapped_column(

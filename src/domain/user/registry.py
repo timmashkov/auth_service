@@ -6,7 +6,7 @@ from sqlalchemy import delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from domain.user.schema import UserReturnData
+from domain.user.schema import UserReturnData, CreateUser, UpdateUser
 from infrastructure.base_entities.abs_repository import (
     AbstractReadRepository,
     AbstractWriteRepository,
@@ -35,13 +35,6 @@ class UserReadRepository(AbstractReadRepository):
             result = answer.scalar_one_or_none()
         return result
 
-    async def get_by_nickname(self, nickname: str) -> Optional[UserReturnData]:
-        async with self.async_session_factory() as session:
-            stmt = select(self.model).filter(self.model.nickname == nickname)
-            answer = await session.execute(stmt)
-            result = answer.scalar_one_or_none()
-        return result
-
     async def get_list(
         self,
         parameter: Any = "created_at",
@@ -66,7 +59,7 @@ class UserWriteRepository(AbstractWriteRepository):
             session_manager.async_session_factory
         )
 
-    async def create(self, cmd: Any) -> Optional[User]:
+    async def create(self, cmd: CreateUser) -> Optional[User]:
         try:
             async with self.transactional_session() as session:
                 stmt = (
@@ -81,7 +74,7 @@ class UserWriteRepository(AbstractWriteRepository):
 
     async def update(
         self,
-        cmd: Any,
+        cmd: UpdateUser,
         user_uuid: UUID,
     ) -> Optional[User]:
         async with self.transactional_session() as session:
