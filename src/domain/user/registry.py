@@ -1,13 +1,16 @@
-from typing import Optional, List, Any
+from typing import Any, List, Optional
 from uuid import UUID
 
 from asyncpg import UniqueViolationError
-from sqlalchemy import select, insert, update, delete
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from domain.user.schema import UserReturnData
-from infrastructure.base_entities.abs_repository import AbstractReadRepository, AbstractWriteRepository
+from infrastructure.base_entities.abs_repository import (
+    AbstractReadRepository,
+    AbstractWriteRepository,
+)
 from infrastructure.database.alchemy_gateway import SessionManager
 from infrastructure.database.models import User
 from infrastructure.exceptions.user_exceptions import UserAlreadyExists
@@ -67,11 +70,7 @@ class UserWriteRepository(AbstractWriteRepository):
         try:
             async with self.transactional_session() as session:
                 stmt = (
-                    insert(self.model)
-                    .values(**cmd.model_dump())
-                    .returning(
-                        self.model
-                    )
+                    insert(self.model).values(**cmd.model_dump()).returning(self.model)
                 )
                 result = await session.execute(stmt)
                 await session.commit()
@@ -90,9 +89,7 @@ class UserWriteRepository(AbstractWriteRepository):
                 update(self.model)
                 .values(**cmd.model_dump())
                 .where(self.model.uuid == user_uuid)
-                .returning(
-                    self.model
-                )
+                .returning(self.model)
             )
             result = await session.execute(stmt)
             await session.commit()
@@ -104,9 +101,7 @@ class UserWriteRepository(AbstractWriteRepository):
             stmt = (
                 delete(self.model)
                 .where(self.model.uuid == user_uuid)
-                .returning(
-                    self.model
-                )
+                .returning(self.model)
             )
             result = await session.execute(stmt)
             await session.commit()

@@ -6,7 +6,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from infrastructure.database.models.base import Base
 
 if TYPE_CHECKING:
-    from infrastructure.database.models.profile import Profile
     from infrastructure.database.models.role import Role
 
 
@@ -28,12 +27,6 @@ class User(Base):
         default=False,
         nullable=False,
     )
-
-    # profile: Mapped["Profile"] = relationship(
-    #     "Profile",
-    #     backref="user",
-    #     lazy="noload",
-    # )
 
     user_role: Mapped["Role"] = relationship(
         "Role",
