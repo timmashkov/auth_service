@@ -27,3 +27,9 @@ default:
     FORMATS: utf-8
     ALGORYTHM: HS256
     API_X_KEY_HEADER: key
+  REDIS:
+    host: localhost
+    port: 6379
+    username:
+    password:
+    db: 0

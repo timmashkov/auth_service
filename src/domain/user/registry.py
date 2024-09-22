@@ -6,7 +6,7 @@ from sqlalchemy import delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from domain.user.schema import UserReturnData, CreateUser, UpdateUser
+from domain.user.schema import CreateUser, UpdateUser, UserReturnData
 from infrastructure.base_entities.abs_repository import (
     AbstractReadRepository,
     AbstractWriteRepository,
@@ -28,9 +28,16 @@ class UserReadRepository(AbstractReadRepository):
             session_manager.async_session_factory
         )
 
-    async def get(self, user_uuid: UUID) -> Optional[UserReturnData]:
+    async def get(self, user_uuid: UUID) -> Optional[User]:
         async with self.async_session_factory() as session:
             stmt = select(self.model).filter(self.model.uuid == user_uuid)
+            answer = await session.execute(stmt)
+            result = answer.scalar_one_or_none()
+        return result
+
+    async def get_by_login(self, login: str) -> Optional[User]:
+        async with self.async_session_factory() as session:
+            stmt = select(self.model).filter(self.model.login == login)
             answer = await session.execute(stmt)
             result = answer.scalar_one_or_none()
         return result

@@ -1,9 +1,13 @@
 import hashlib
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
 import jwt
-from fastapi.security import APIKeyHeader, HTTPBearer
+import orjson
+from fastapi import Security
+from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
+from redis.asyncio import Redis
 
 from infrastructure.exceptions.token_exceptions import (
     InvalidRefreshToken,
@@ -11,6 +15,7 @@ from infrastructure.exceptions.token_exceptions import (
     InvalidToken,
     RefreshTokenExpired,
     TokenExpired,
+    Unauthorized,
 )
 
 
@@ -24,6 +29,7 @@ class AuthHandler:
         hash_name: str,
         formats: str,
         algorythm: str,
+        redis_client: Redis,
     ):
         self._secret = secret
         self._exp = exp
@@ -33,6 +39,7 @@ class AuthHandler:
         self._formats = formats
         self._algorythm = algorythm
         self._jwt_header = HTTPBearer()
+        self.redis_client = redis_client
 
     async def encode_pass(self, password: str, salt: str) -> str:
         password = password.encode(self._formats)
@@ -110,3 +117,28 @@ class AuthHandler:
             raise RefreshTokenExpired
         except jwt.InvalidTokenError:
             raise InvalidRefreshToken
+
+    async def check_jwt(self) -> str:
+        credentials: HTTPAuthorizationCredentials = Security(self._jwt_header)
+        token = credentials.credentials
+        if not await self.decode_token(token):
+            raise Unauthorized
+        return token
+
+    async def save_tokens_to_session(
+        self, access_token: str, refresh_token: str, user_uuid: str
+    ) -> None:
+        _tokens: dict[str:str] = {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+        }
+        saved_data = orjson.dumps(_tokens)
+        await self.redis_client.set(name=user_uuid, value=saved_data, ex=self._exp)
+
+    async def del_tokes_from_session(self, user_uuid: str) -> None:
+        await self.redis_client.delete(user_uuid)
+
+    async def get_tokens_from_session(self, user_uuid: str) -> Optional[dict[str:str]]:
+        if raw_data := await self.redis_client.get(user_uuid):
+            return orjson.loads(raw_data)
+        return None

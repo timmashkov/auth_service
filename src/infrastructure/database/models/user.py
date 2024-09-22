@@ -12,7 +12,9 @@ if TYPE_CHECKING:
 class User(Base):
 
     nickname: Mapped[str] = mapped_column(
-        String, unique=True, nullable=True,
+        String,
+        unique=True,
+        nullable=True,
     )
     login: Mapped[str] = mapped_column(
         String(20),

@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, field_validator, Field, EmailStr
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 class GetUserByUUID(BaseModel):
@@ -46,3 +46,8 @@ class UserReturnData(GetUserByUUID, UpdateUser):
 
 class UserReturnFullData(UserReturnData):
     password: str
+
+
+class UserTokenResult(BaseModel):
+    access_token: str
+    refresh_token: str

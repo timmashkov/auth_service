@@ -1,3 +1,5 @@
+from redis.asyncio import Redis
+
 from application.config import settings
 from domain.user.registry import UserReadRepository, UserWriteRepository
 from infrastructure.auth.token_handler import AuthHandler
@@ -6,6 +8,12 @@ from infrastructure.database.alchemy_gateway import SessionManager
 
 
 class Container(Singleton):
+
+    redis = OnlyContainer(
+        Redis,
+        **settings.REDIS,
+        decode_responses=True,
+    )
 
     alchemy_manager = OnlyContainer(
         SessionManager,
@@ -37,4 +45,5 @@ class Container(Singleton):
         hash_name=settings.AUTH.hash_name,
         formats=settings.AUTH.formats,
         algorythm=settings.AUTH.algorythm,
+        redis_client=redis(),
     )

@@ -8,9 +8,8 @@ Create Date: 2024-09-21 19:36:39.665201
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "2954ac5db252"
@@ -45,13 +44,9 @@ def upgrade() -> None:
         existing_comment="УУИД юзера",
         existing_nullable=True,
     )
-    op.add_column(
-        "users", sa.Column("login", sa.String(length=20), nullable=False)
-    )
+    op.add_column("users", sa.Column("login", sa.String(length=20), nullable=False))
     op.add_column("users", sa.Column("password", sa.Text(), nullable=False))
-    op.add_column(
-        "users", sa.Column("email", sa.String(length=50), nullable=False)
-    )
+    op.add_column("users", sa.Column("email", sa.String(length=50), nullable=False))
     op.add_column(
         "users",
         sa.Column("phone_number", sa.String(length=11), nullable=False),
