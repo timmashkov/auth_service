@@ -4,6 +4,7 @@ from application.config import settings
 from domain.user.registry import UserReadRepository, UserWriteRepository
 from infrastructure.auth.token_handler import AuthHandler
 from infrastructure.base_entities.singleton import OnlyContainer, Singleton
+from infrastructure.broker.kafka import KafkaConsumer, KafkaProducer
 from infrastructure.database.alchemy_gateway import SessionManager
 
 
@@ -46,4 +47,20 @@ class Container(Singleton):
         formats=settings.AUTH.formats,
         algorythm=settings.AUTH.algorythm,
         redis_client=redis(),
+    )
+
+    producer_client = OnlyContainer(
+        KafkaProducer,
+        host=settings.KAFKA.host,
+        port=settings.KAFKA.port,
+        topics=settings.KAFKA.topics,
+        logging_config=settings.LOG_LEVEL,
+    )
+
+    consumer_client = OnlyContainer(
+        KafkaConsumer,
+        host=settings.KAFKA.host,
+        port=settings.KAFKA.port,
+        topics=settings.KAFKA.topics,
+        logging_config=settings.LOG_LEVEL,
     )

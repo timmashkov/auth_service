@@ -1,7 +1,9 @@
+import asyncio
 from typing import List, Optional
 
 from fastapi import Depends
 
+from application.config import settings
 from application.container import Container
 from domain.user.registry import UserReadRepository, UserWriteRepository
 from domain.user.schema import (
@@ -14,6 +16,7 @@ from domain.user.schema import (
 )
 from infrastructure.auth.token_handler import AuthHandler
 from infrastructure.base_entities.base_model import BaseResultModel
+from infrastructure.broker.kafka import KafkaProducer
 from infrastructure.exceptions.token_exceptions import Unauthorized
 from infrastructure.exceptions.user_exceptions import UserNotFound, WrongPassword
 
@@ -26,10 +29,12 @@ class UserService:
             Container.user_write_repository,
         ),
         auth_handler: AuthHandler = Depends(Container.auth_handler),
+        kafka_handler: KafkaProducer = Depends(Container.producer_client),
     ):
         self.read_repo = read_repository
         self.write_repo = write_repository
         self.auth_repo = auth_handler
+        self.kafka_repo = kafka_handler
 
     async def get(self, cmd: GetUserByUUID) -> Optional[UserReturnData]:
         if result := await self.read_repo.get(user_uuid=cmd.uuid):
@@ -37,6 +42,12 @@ class UserService:
         raise UserNotFound
 
     async def get_list(self, parameter: str) -> Optional[List[UserReturnData]]:
+        asyncio.create_task(
+            self.kafka_repo.send_message(
+                routing_key=settings.KAFKA.routing_key,
+                message="test_message",
+            ),
+        )
         return await self.read_repo.get_list(parameter=parameter)
 
     async def create(self, data: CreateUser) -> Optional[UserReturnData]:
@@ -48,7 +59,16 @@ class UserService:
             phone_number=data.phone_number,
             age=data.age,
         )
-        return await self.write_repo.create(cmd=cmd)
+        if created_user := await self.write_repo.create(cmd=cmd):
+            data_dict = cmd.model_dump()
+            data_dict["user_uuid"] = str(created_user.uuid)
+            asyncio.create_task(
+                self.kafka_repo.send_message(
+                    routing_key=settings.KAFKA.routing_key,
+                    message=data_dict,
+                ),
+            )
+        return created_user
 
     async def update(
         self, data: UpdateUser, user_uuid: GetUserByUUID

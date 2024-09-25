@@ -21,6 +21,7 @@ dynaconf = "^3.2.6"
 pyjwt = "^2.9.0"
 email-validator = "^2.2.0"
 redis = "^5.0.8"
+aiokafka = "^0.11.0"
 
 
 [build-system]
