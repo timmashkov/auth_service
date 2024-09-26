@@ -42,12 +42,6 @@ class UserService:
         raise UserNotFound
 
     async def get_list(self, parameter: str) -> Optional[List[UserReturnData]]:
-        asyncio.create_task(
-            self.kafka_repo.send_message(
-                routing_key=settings.KAFKA.routing_key,
-                message="test_message",
-            ),
-        )
         return await self.read_repo.get_list(parameter=parameter)
 
     async def create(self, data: CreateUser) -> Optional[UserReturnData]:
@@ -62,9 +56,9 @@ class UserService:
         if created_user := await self.write_repo.create(cmd=cmd):
             data_dict = cmd.model_dump()
             data_dict["user_uuid"] = str(created_user.uuid)
+            data_dict["event_type"] = "create"
             asyncio.create_task(
                 self.kafka_repo.send_message(
-                    routing_key=settings.KAFKA.routing_key,
                     message=data_dict,
                 ),
             )
@@ -73,10 +67,28 @@ class UserService:
     async def update(
         self, data: UpdateUser, user_uuid: GetUserByUUID
     ) -> Optional[UserReturnData]:
-        return await self.write_repo.update(cmd=data, user_uuid=user_uuid.uuid)
+        if updated_user := await self.write_repo.update(
+            cmd=data, user_uuid=user_uuid.uuid
+        ):
+            data_dict = data.model_dump()
+            data_dict["user_uuid"] = str(updated_user.uuid)
+            data_dict["event_type"] = "update"
+            asyncio.create_task(
+                self.kafka_repo.send_message(
+                    message=data_dict,
+                ),
+            )
+        return updated_user
 
     async def delete(self, user_uuid: GetUserByUUID) -> Optional[UserReturnData]:
-        return await self.write_repo.delete(user_uuid=user_uuid.uuid)
+        if deleted_user := await self.write_repo.delete(user_uuid=user_uuid.uuid):
+            data_dict = {"user_uuid": str(deleted_user.uuid), "event_type": "delete"}
+            asyncio.create_task(
+                self.kafka_repo.send_message(
+                    message=data_dict,
+                ),
+            )
+        return deleted_user
 
     async def login_user(self, cmd: LoginUser) -> UserTokenResult:
         user = await self.read_repo.get_by_login(login=cmd.login)

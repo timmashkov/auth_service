@@ -9,7 +9,6 @@ async def _amqp_handler(
     kafka_client: KafkaConsumer = Container.consumer_client(),
 ) -> None:
     await kafka_client.connect()
-    await kafka_client.init_consuming(callback)
 
 
 def amqp_handler():
@@ -19,7 +18,3 @@ def amqp_handler():
 
 
 process = Process(target=amqp_handler)
-
-
-async def callback(*args):
-    print(args)
