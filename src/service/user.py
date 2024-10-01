@@ -6,14 +6,7 @@ from fastapi import Depends
 from application.config import settings
 from application.container import Container
 from domain.user.registry import UserReadRepository, UserWriteRepository
-from domain.user.schema import (
-    CreateUser,
-    GetUserByUUID,
-    LoginUser,
-    UpdateUser,
-    UserReturnData,
-    UserTokenResult,
-)
+from domain.user.schema import CreateUser, GetUserByUUID, LoginUser, UpdateUser, UserReturnData, UserTokenResult
 from infrastructure.auth.token_handler import AuthHandler
 from infrastructure.base_entities.base_model import BaseResultModel
 from infrastructure.broker.kafka import KafkaProducer
@@ -60,6 +53,7 @@ class UserService:
             asyncio.create_task(
                 self.kafka_repo.send_message(
                     message=data_dict,
+                    topic=settings.KAFKA.topics.register_topic,
                 ),
             )
         return created_user
@@ -76,6 +70,7 @@ class UserService:
             asyncio.create_task(
                 self.kafka_repo.send_message(
                     message=data_dict,
+                    topic=settings.KAFKA.topics.register_topic,
                 ),
             )
         return updated_user
@@ -86,6 +81,7 @@ class UserService:
             asyncio.create_task(
                 self.kafka_repo.send_message(
                     message=data_dict,
+                    topic=settings.KAFKA.topics.register_topic,
                 ),
             )
         return deleted_user

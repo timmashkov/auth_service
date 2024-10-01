@@ -43,14 +43,14 @@ class KafkaProducer(BaseMQ):
     async def send_message(
         self,
         message: Union[str, bytes, list, dict],
+        topic: str,
     ):
         await self._init_logger()
-        for topic in self.topics:
-            await self.__producer.send_and_wait(
-                topic=topic,
-                value=self.serialize_message(message),
-            )
-            logging.info("Сообщение отправлено")
+        await self.__producer.send_and_wait(
+            topic=topic,
+            value=self.serialize_message(message),
+        )
+        logging.info("Сообщение отправлено")
 
 
 class KafkaConsumer(BaseMQ):
