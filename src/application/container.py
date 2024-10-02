@@ -1,6 +1,11 @@
 from redis.asyncio import Redis
 
 from application.config import settings
+from domain.permission.registry import (
+    PermissionReadRepository,
+    PermissionWriteRepository,
+)
+from domain.role.registry import RoleReadRepository, RoleWriteRepository
 from domain.user.registry import UserReadRepository, UserWriteRepository
 from infrastructure.auth.token_handler import AuthHandler
 from infrastructure.base_entities.singleton import OnlyContainer, Singleton
@@ -34,6 +39,26 @@ class Container(Singleton):
 
     user_write_repository = OnlyContainer(
         UserWriteRepository,
+        session_manager=alchemy_manager(),
+    )
+
+    role_read_repository = OnlyContainer(
+        RoleReadRepository,
+        session_manager=alchemy_manager(),
+    )
+
+    role_write_repository = OnlyContainer(
+        RoleWriteRepository,
+        session_manager=alchemy_manager(),
+    )
+
+    perm_read_repository = OnlyContainer(
+        PermissionReadRepository,
+        session_manager=alchemy_manager(),
+    )
+
+    perm_write_repository = OnlyContainer(
+        PermissionWriteRepository,
         session_manager=alchemy_manager(),
     )
 

@@ -6,21 +6,21 @@ from sqlalchemy import delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from domain.user.schema import CreateUser, UpdateUser, UserReturnData
+from domain.role.schema import CreateRole, RoleReturnData
 from infrastructure.base_entities.abs_repository import (
     AbstractReadRepository,
     AbstractWriteRepository,
 )
 from infrastructure.database.alchemy_gateway import SessionManager
-from infrastructure.database.models import User
+from infrastructure.database.models import Role
 from infrastructure.exceptions.user_exceptions import UserAlreadyExists
 
 
-class UserReadRepository(AbstractReadRepository):
+class RoleReadRepository(AbstractReadRepository):
 
     def __init__(self, session_manager: SessionManager) -> None:
         super().__init__()
-        self.model = User
+        self.model = Role
         self.transactional_session: async_sessionmaker = (
             session_manager.transactional_session
         )
@@ -28,16 +28,9 @@ class UserReadRepository(AbstractReadRepository):
             session_manager.async_session_factory
         )
 
-    async def get(self, user_uuid: UUID) -> Optional[User]:
+    async def get(self, role_uuid: UUID) -> Optional[Role]:
         async with self.async_session_factory() as session:
-            stmt = select(self.model).filter(self.model.uuid == user_uuid)
-            answer = await session.execute(stmt)
-            result = answer.scalar_one_or_none()
-        return result
-
-    async def get_by_login(self, login: str) -> Optional[User]:
-        async with self.async_session_factory() as session:
-            stmt = select(self.model).filter(self.model.login == login)
+            stmt = select(self.model).filter(self.model.uuid == role_uuid)
             answer = await session.execute(stmt)
             result = answer.scalar_one_or_none()
         return result
@@ -45,7 +38,7 @@ class UserReadRepository(AbstractReadRepository):
     async def get_list(
         self,
         parameter: Any = "created_at",
-    ) -> Optional[List[UserReturnData]]:
+    ) -> Optional[List[RoleReturnData]]:
         async with self.async_session_factory() as session:
             final = None
             if option := getattr(self.model, parameter):
@@ -55,10 +48,10 @@ class UserReadRepository(AbstractReadRepository):
         return final
 
 
-class UserWriteRepository(AbstractWriteRepository):
+class RoleWriteRepository(AbstractWriteRepository):
     def __init__(self, session_manager: SessionManager):
         super().__init__()
-        self.model = User
+        self.model = Role
         self.transactional_session: async_sessionmaker = (
             session_manager.transactional_session
         )
@@ -66,7 +59,7 @@ class UserWriteRepository(AbstractWriteRepository):
             session_manager.async_session_factory
         )
 
-    async def create(self, cmd: CreateUser) -> Optional[User]:
+    async def create(self, cmd: CreateRole) -> Optional[Role]:
         try:
             async with self.transactional_session() as session:
                 stmt = (
@@ -81,14 +74,14 @@ class UserWriteRepository(AbstractWriteRepository):
 
     async def update(
         self,
-        cmd: UpdateUser,
-        user_uuid: UUID,
-    ) -> Optional[User]:
+        cmd: CreateRole,
+        role_uuid: UUID,
+    ) -> Optional[Role]:
         async with self.transactional_session() as session:
             stmt = (
                 update(self.model)
                 .values(**cmd.model_dump())
-                .where(self.model.uuid == user_uuid)
+                .where(self.model.uuid == role_uuid)
                 .returning(self.model)
             )
             result = await session.execute(stmt)
@@ -96,11 +89,11 @@ class UserWriteRepository(AbstractWriteRepository):
             answer = result.scalar_one_or_none()
         return answer
 
-    async def delete(self, user_uuid: UUID) -> Optional[User]:
+    async def delete(self, role_uuid: UUID) -> Optional[Role]:
         async with self.transactional_session() as session:
             stmt = (
                 delete(self.model)
-                .where(self.model.uuid == user_uuid)
+                .where(self.model.uuid == role_uuid)
                 .returning(self.model)
             )
             result = await session.execute(stmt)

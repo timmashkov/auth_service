@@ -6,7 +6,14 @@ from fastapi import Depends
 from application.config import settings
 from application.container import Container
 from domain.user.registry import UserReadRepository, UserWriteRepository
-from domain.user.schema import CreateUser, GetUserByUUID, LoginUser, UpdateUser, UserReturnData, UserTokenResult
+from domain.user.schema import (
+    CreateUser,
+    GetUserByUUID,
+    LoginUser,
+    UpdateUser,
+    UserReturnData,
+    UserTokenResult,
+)
 from infrastructure.auth.token_handler import AuthHandler
 from infrastructure.base_entities.base_model import BaseResultModel
 from infrastructure.broker.kafka import KafkaProducer
