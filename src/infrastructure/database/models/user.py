@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import Boolean, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -21,7 +21,7 @@ class User(Base):
         unique=True,
         nullable=False,
     )
-    password: Mapped[str] = mapped_column(
+    hashed_password: Mapped[str] = mapped_column(
         Text,
         unique=False,
         nullable=False,
@@ -46,12 +46,18 @@ class User(Base):
         default=False,
         nullable=False,
     )
-
-    user_role: Mapped["Role"] = relationship(
-        "Role",
-        back_populates="user_link",
-        cascade="all, delete-orphan",
-        passive_updates=True,
-        passive_deletes=True,
-        single_parent=True,
+    is_superuser: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False,
+    )
+    roles: Mapped[List["Role"]] = relationship(
+        secondary="user_roles",
+        back_populates="users",
+        lazy="joined",
     )

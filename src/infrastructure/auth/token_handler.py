@@ -41,7 +41,7 @@ class AuthHandler:
         self._jwt_header = HTTPBearer()
         self.redis_client = redis_client
 
-    async def encode_pass(self, password: str, salt: str) -> str:
+    def encode_pass(self, password: str, salt: str) -> str:
         password = password.encode(self._formats)
         salt = salt.encode(self._formats)
         hashed_pass = hashlib.pbkdf2_hmac(

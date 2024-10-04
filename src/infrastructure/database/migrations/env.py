@@ -16,9 +16,12 @@ from infrastructure.database.models.base import Base
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-
+script = context.script
 config.set_main_option("sqlalchemy.url", DB_URL_WITH_ALEMBIC)
-
+here = os.path.abspath(os.path.dirname(__file__))
+seeds_path = f"{os.path.join(here, 'seeds')}"
+versions_path = f"{os.path.join(here, 'versions')}"
+script.version_locations = [seeds_path, versions_path]
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
