@@ -17,7 +17,7 @@ from infrastructure.database.models import Role, User
 revision = "0002_seed"
 down_revision = "0001_seed"
 branch_labels = None
-depends_on = ["72112e6a6208", "5b08fc804d28"]
+depends_on = None
 
 
 def upgrade() -> None:

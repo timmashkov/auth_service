@@ -45,7 +45,7 @@ class UserService:
         return await self.read_repo.get_list(parameter=parameter)
 
     async def create(self, data: CreateUser) -> Optional[UserReturnData]:
-        _salted_pass = await self.auth_repo.encode_pass(data.password, data.login)
+        _salted_pass = self.auth_repo.encode_pass(data.password, data.login)
         cmd = CreateUser(
             login=data.login,
             password=_salted_pass,
@@ -100,11 +100,11 @@ class UserService:
         if not await self.auth_repo.verify_password(
             password=cmd.password,
             salt=cmd.login,
-            encoded_pass=user.password,
+            encoded_pass=user.hashed_password,
         ):
             raise WrongPassword
-        access_token = await self.auth_repo.encode_token(user_id=user.uuid)
-        refresh_token = await self.auth_repo.encode_refresh_token(user_id=user.uuid)
+        access_token = self.auth_repo.encode_token(user_id=user.uuid)
+        refresh_token = self.auth_repo.encode_refresh_token(user_id=user.uuid)
         await self.auth_repo.save_tokens_to_session(
             access_token=access_token,
             refresh_token=refresh_token,
@@ -116,7 +116,7 @@ class UserService:
         )
 
     async def logout_user(self, refresh_token: str) -> BaseResultModel:
-        user_uuid = await self.auth_repo.decode_refresh_token(token=refresh_token)
+        user_uuid = self.auth_repo.decode_refresh_token(token=refresh_token)
         tokens = await self.auth_repo.get_tokens_from_session(user_uuid=user_uuid)
         if not tokens:
             raise Unauthorized
@@ -126,12 +126,12 @@ class UserService:
         raise Unauthorized
 
     async def refresh_token(self, refresh_token: str) -> UserTokenResult:
-        user_uuid = await self.auth_repo.decode_refresh_token(token=refresh_token)
+        user_uuid = self.auth_repo.decode_refresh_token(token=refresh_token)
         tokens = await self.auth_repo.get_tokens_from_session(user_uuid=user_uuid)
         if not tokens:
             raise Unauthorized
         if tokens["refresh_token"] == refresh_token:
-            new_tokens = await self.auth_repo.refresh_token(refresh_token=refresh_token)
+            new_tokens = self.auth_repo.refresh_token(refresh_token=refresh_token)
             await self.auth_repo.save_tokens_to_session(
                 access_token=new_tokens["new_access_token"],
                 refresh_token=new_tokens["new_refresh_token"],
@@ -144,7 +144,7 @@ class UserService:
         raise Unauthorized
 
     async def check_auth(self, refresh_token: str) -> BaseResultModel:
-        user_uuid = await self.auth_repo.decode_refresh_token(token=refresh_token)
+        user_uuid = self.auth_repo.decode_refresh_token(token=refresh_token)
         tokens = await self.auth_repo.get_tokens_from_session(user_uuid=user_uuid)
         if not tokens:
             raise Unauthorized

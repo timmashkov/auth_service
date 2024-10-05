@@ -10,7 +10,7 @@ class GetUserByUUID(BaseModel):
 
 class LoginUser(BaseModel):
     login: str
-    password: str
+    hashed_password: str
 
 
 class UpdateUser(BaseModel):
@@ -45,7 +45,7 @@ class UserReturnData(GetUserByUUID, UpdateUser):
 
 
 class UserReturnFullData(UserReturnData):
-    password: str
+    hashed_password: str
 
 
 class UserTokenResult(BaseModel):
