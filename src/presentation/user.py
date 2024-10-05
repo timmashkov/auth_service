@@ -13,6 +13,9 @@ from domain.user.schema import (
     UserTokenResult,
 )
 from infrastructure.base_entities.base_model import BaseResultModel
+from infrastructure.database.models import User
+from infrastructure.exceptions.token_exceptions import NoRights
+from service.authenticate import AuthService
 from service.user import UserService
 
 
@@ -21,6 +24,7 @@ class UserRouter:
     output_model: BaseModel = UserReturnData
     input_model: BaseModel = CreateUser
     service_client: UserService = Depends(UserService)
+    current_user: User = Depends(AuthService().get_current_user)
 
     @staticmethod
     @api_router.get("/one", response_model=output_model)
@@ -34,9 +38,12 @@ class UserRouter:
     @api_router.get("/all", response_model=List[output_model])
     async def get_users(
         parameter: str = "created_at",
+        current_user=current_user,
         service=service_client,
     ) -> List[output_model]:
-        return await service.get_list(parameter=parameter)
+        if current_user:
+            return await service.get_list(parameter=parameter)
+        raise NoRights
 
     @staticmethod
     @api_router.post("/create", response_model=output_model)
@@ -64,35 +71,3 @@ class UserRouter:
         service=service_client,
     ) -> output_model:
         return await service.delete(user_uuid=GetUserByUUID(uuid=user_uuid))
-
-    @staticmethod
-    @api_router.post("/login", response_model=UserTokenResult)
-    async def login_user(
-        cmd: LoginUser,
-        service=service_client,
-    ) -> UserTokenResult:
-        return await service.login_user(cmd=cmd)
-
-    @staticmethod
-    @api_router.post("/logout", response_model=BaseResultModel)
-    async def logout_user(
-        refresh_token: str,
-        service=service_client,
-    ) -> BaseResultModel:
-        return await service.logout_user(refresh_token=refresh_token)
-
-    @staticmethod
-    @api_router.get("/refresh_token", response_model=UserTokenResult)
-    async def refresh_user_token(
-        refresh_token: str,
-        service=service_client,
-    ) -> UserTokenResult:
-        return await service.refresh_token(refresh_token=refresh_token)
-
-    @staticmethod
-    @api_router.get("/is_auth", response_model=BaseResultModel)
-    async def is_auth(
-        refresh_token: str,
-        service=service_client,
-    ) -> BaseResultModel:
-        return await service.check_auth(refresh_token=refresh_token)

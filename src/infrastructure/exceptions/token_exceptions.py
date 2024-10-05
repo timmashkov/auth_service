@@ -48,6 +48,11 @@ class NoRights(BaseAPIException):
     status_code = status.HTTP_403_FORBIDDEN
 
 
+class SessionExpired(BaseAPIException):
+    message = "Toked life session has been expired"
+    status_code = status.HTTP_406_NOT_ACCEPTABLE
+
+
 class Unapproved(BaseAPIException):
     message = "User is not approved"
     status_code = status.HTTP_401_UNAUTHORIZED

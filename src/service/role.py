@@ -25,7 +25,6 @@ class RoleService:
         return await self.read_repo.get_list(parameter=parameter)
 
     async def create(self, data: CreateRole) -> Optional[RoleReturnData]:
-
         return await self.write_repo.create(cmd=data)
 
     async def update(
