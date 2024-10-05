@@ -150,19 +150,3 @@ class AuthService:
         if tokens["refresh_token"] == refresh_token:
             return BaseResultModel(status=True)
         raise Unauthorized
-
-    async def get_current_user(
-        self, credentials: HTTPAuthorizationCredentials = Security(HTTPBearer())
-    ) -> Optional[User]:
-        token = credentials.credentials
-        user_id = self.auth_repo.decode_refresh_token(token)
-        if not user_id:
-            raise InvalidRefreshToken
-
-        if not await self.auth_repo.get_tokens_from_session(user_id):
-            raise SessionExpired
-
-        user = await self.read_repo.get(uuid.UUID(user_id))
-        if not user:
-            raise UserNotFound
-        return user

@@ -32,14 +32,14 @@ class UserReadRepository(AbstractReadRepository):
         async with self.async_session_factory() as session:
             stmt = select(self.model).filter(self.model.uuid == user_uuid)
             answer = await session.execute(stmt)
-            result = answer.scalar_one_or_none()
+            result = answer.scalars().unique().first()
         return result
 
     async def get_by_login(self, login: str) -> Optional[User]:
         async with self.async_session_factory() as session:
             stmt = select(self.model).filter(self.model.login == login)
             answer = await session.execute(stmt)
-            result = answer.scalar_one_or_none()
+            result = answer.scalars().unique().first()
         return result
 
     async def get_list(
@@ -74,7 +74,7 @@ class UserWriteRepository(AbstractWriteRepository):
                 )
                 result = await session.execute(stmt)
                 await session.commit()
-                answer = result.scalar_one_or_none()
+                answer = result.scalars().unique().first()
             return answer
         except (UniqueViolationError, IntegrityError):
             raise UserAlreadyExists
@@ -93,7 +93,7 @@ class UserWriteRepository(AbstractWriteRepository):
             )
             result = await session.execute(stmt)
             await session.commit()
-            answer = result.scalar_one_or_none()
+            answer = result.scalars().unique().first()
         return answer
 
     async def delete(self, user_uuid: UUID) -> Optional[User]:
@@ -105,5 +105,5 @@ class UserWriteRepository(AbstractWriteRepository):
             )
             result = await session.execute(stmt)
             await session.commit()
-            answer = result.scalar_one_or_none()
+            answer = result.scalars().unique().first()
         return answer

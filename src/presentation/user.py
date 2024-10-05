@@ -4,18 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from domain.user.schema import (
-    CreateUser,
-    GetUserByUUID,
-    LoginUser,
-    UpdateUser,
-    UserReturnData,
-    UserTokenResult,
-)
-from infrastructure.base_entities.base_model import BaseResultModel
-from infrastructure.database.models import User
-from infrastructure.exceptions.token_exceptions import NoRights
-from service.authenticate import AuthService
+from domain.user.schema import CreateUser, GetUserByUUID, UpdateUser, UserReturnData
 from service.user import UserService
 
 
@@ -24,7 +13,6 @@ class UserRouter:
     output_model: BaseModel = UserReturnData
     input_model: BaseModel = CreateUser
     service_client: UserService = Depends(UserService)
-    current_user: User = Depends(AuthService().get_current_user)
 
     @staticmethod
     @api_router.get("/one", response_model=output_model)
@@ -38,12 +26,9 @@ class UserRouter:
     @api_router.get("/all", response_model=List[output_model])
     async def get_users(
         parameter: str = "created_at",
-        current_user=current_user,
         service=service_client,
     ) -> List[output_model]:
-        if current_user:
-            return await service.get_list(parameter=parameter)
-        raise NoRights
+        return await service.get_list(parameter=parameter)
 
     @staticmethod
     @api_router.post("/create", response_model=output_model)
