@@ -28,9 +28,9 @@ class PermissionReadRepository(AbstractReadRepository):
             session_manager.async_session_factory
         )
 
-    async def get(self, role_uuid: UUID) -> Optional[Permission]:
+    async def get(self, perm_uuid: UUID) -> Optional[Permission]:
         async with self.async_session_factory() as session:
-            stmt = select(self.model).filter(self.model.uuid == role_uuid)
+            stmt = select(self.model).filter(self.model.uuid == perm_uuid)
             answer = await session.execute(stmt)
             result = answer.scalar_one_or_none()
         return result
@@ -44,7 +44,7 @@ class PermissionReadRepository(AbstractReadRepository):
             if option := getattr(self.model, parameter):
                 stmt = select(self.model).order_by(option)
                 result = await session.execute(stmt)
-                final = result.scalars().all()
+                final = result.scalars().unique().all()
         return final
 
 
@@ -75,13 +75,13 @@ class PermissionWriteRepository(AbstractWriteRepository):
     async def update(
         self,
         cmd: CreatePermission,
-        role_uuid: UUID,
+        perm_uuid: UUID,
     ) -> Optional[Permission]:
         async with self.transactional_session() as session:
             stmt = (
                 update(self.model)
                 .values(**cmd.model_dump())
-                .where(self.model.uuid == role_uuid)
+                .where(self.model.uuid == perm_uuid)
                 .returning(self.model)
             )
             result = await session.execute(stmt)
@@ -89,11 +89,11 @@ class PermissionWriteRepository(AbstractWriteRepository):
             answer = result.scalar_one_or_none()
         return answer
 
-    async def delete(self, role_uuid: UUID) -> Optional[Permission]:
+    async def delete(self, perm_uuid: UUID) -> Optional[Permission]:
         async with self.transactional_session() as session:
             stmt = (
                 delete(self.model)
-                .where(self.model.uuid == role_uuid)
+                .where(self.model.uuid == perm_uuid)
                 .returning(self.model)
             )
             result = await session.execute(stmt)

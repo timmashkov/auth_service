@@ -44,7 +44,7 @@ class RoleReadRepository(AbstractReadRepository):
             if option := getattr(self.model, parameter):
                 stmt = select(self.model).order_by(option)
                 result = await session.execute(stmt)
-                final = result.scalars().all()
+                final = result.scalars().unique().all()
         return final
 
 

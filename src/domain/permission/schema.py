@@ -12,7 +12,6 @@ class GetPermissionByUUID(BaseModel):
 class CreatePermission(BaseModel):
     name: str
     layer: str
-    role_uuid: UUID
     jdata: Optional[dict]
 
 
