@@ -13,13 +13,18 @@ if TYPE_CHECKING:
 class Permission(Base):
 
     name: Mapped[str] = mapped_column(
-        String, comment="Человекочитаемое название разрешения"
+        String,
+        comment="Человекочитаемое название разрешения",
     )
     layer: Mapped[str] = mapped_column(
-        String, comment="К чему относится разрешение ('frontend'/'backend'/...)"
+        String,
+        comment="К чему относится разрешение ('frontend'/'backend'/...)",
     )
     jdata: Mapped[dict] = mapped_column(
-        JSONB, server_default="{}", default={}, comment="Разрешения"
+        JSONB,
+        server_default="{}",
+        default={},
+        comment="Разрешения",
     )
 
     roles: Mapped["Role"] = relationship(

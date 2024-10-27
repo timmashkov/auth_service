@@ -16,7 +16,10 @@ class Role(Base):
     name: Mapped[str] = mapped_column(String, unique=True, comment="Название")
 
     jdata: Mapped[dict] = mapped_column(
-        JSONB, server_default="{}", default={}, comment="Дополнительные данные"
+        JSONB,
+        server_default="{}",
+        default={},
+        comment="Дополнительные данные",
     )
 
     users: Mapped[List["User"]] = relationship(

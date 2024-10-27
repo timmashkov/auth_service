@@ -17,4 +17,4 @@ def amqp_handler():
     _loop.run_forever()
 
 
-process = Process(target=amqp_handler)
+amqp_process = Process(target=amqp_handler)

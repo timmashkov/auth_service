@@ -4,11 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from domain.permission.schema import (
-    CreatePermission,
-    GetPermissionByUUID,
-    PermissionReturnData,
-)
+from domain.permission.schema import CreatePermission, GetPermissionByUUID, PermissionReturnData
 from service.permission import PermissionService
 
 

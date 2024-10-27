@@ -1,6 +1,6 @@
 import logging
 from asyncio import AbstractEventLoop, get_event_loop
-from typing import Awaitable, List, Optional, Union
+from typing import Any, Awaitable, List, Optional, Union
 
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
@@ -12,6 +12,8 @@ class KafkaProducer(BaseMQ):
         self,
         host: str,
         port: int,
+        acks: str,
+        transactional_id: Any,
         loop: Optional[AbstractEventLoop] = None,
         topics: Optional[List[str]] = [],
         logging_config: Optional[str] = None,
@@ -24,6 +26,8 @@ class KafkaProducer(BaseMQ):
         self.__producer = AIOKafkaProducer(
             bootstrap_servers=f"{host}:{port}",
             loop=self.loop,
+            acks=acks,
+            transactional_id=transactional_id,
         )
 
     async def _init_logger(self) -> None:
@@ -40,17 +44,36 @@ class KafkaProducer(BaseMQ):
         await self.__producer.stop()
         logging.info("Отключение kafka прошла успешно")
 
-    async def send_message(
+    async def simple_send_message(
         self,
         message: Union[str, bytes, list, dict],
         topic: str,
-    ):
+    ) -> None:
         await self._init_logger()
         await self.__producer.send_and_wait(
             topic=topic,
             value=self.serialize_message(message),
         )
         logging.info("Сообщение отправлено")
+
+    async def transactional_send_message(
+        self,
+        message: Union[str, bytes, list, dict],
+        topic: str,
+    ) -> None:
+        await self._init_logger()
+        try:
+            await self.__producer.begin_transaction()
+            await self.__producer.send_and_wait(
+                topic=topic,
+                value=self.serialize_message(message),
+            )
+            await self.__producer.commit_transaction()
+            logging.info("Сообщение отправлено и транзакция зафиксирована")
+
+        except Exception as e:
+            await self.__producer.abort_transaction()
+            logging.error(f"Ошибка при отправке сообщения: {e}, транзакция откатана")
 
 
 class KafkaConsumer(BaseMQ):

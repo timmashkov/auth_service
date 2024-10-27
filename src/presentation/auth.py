@@ -4,14 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from domain.user.schema import (
-    CreateUser,
-    GetUserByUUID,
-    LoginUser,
-    UpdateUser,
-    UserReturnData,
-    UserTokenResult,
-)
+from domain.user.schema import CreateUser, GetUserByUUID, LoginUser, UpdateUser, UserReturnData, UserTokenResult
 from infrastructure.base_entities.base_model import BaseResultModel
 from service.authenticate import AuthService
 

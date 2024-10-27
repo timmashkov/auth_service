@@ -126,7 +126,10 @@ class AuthHandler:
         return token
 
     async def save_tokens_to_session(
-        self, access_token: str, refresh_token: str, user_uuid: str
+        self,
+        access_token: str,
+        refresh_token: str,
+        user_uuid: str,
     ) -> None:
         _tokens: dict[str:str] = {
             "access_token": access_token,

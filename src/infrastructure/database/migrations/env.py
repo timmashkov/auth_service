@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 sys.path.append(os.path.join(sys.path[0], "src"))
 
-from application.config import DB_URL_WITH_ALEMBIC
+from infrastructure.config.config import DB_URL_WITH_ALEMBIC
 from infrastructure.database.models.base import Base
 
 # this is the Alembic Config object, which provides

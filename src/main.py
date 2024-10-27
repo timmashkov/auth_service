@@ -1,6 +1,6 @@
 import uvicorn
 
-from application.config import settings
+from infrastructure.config.config import settings
 
 if __name__ == "__main__":
     uvicorn.run(

@@ -1,30 +1,16 @@
 import asyncio
-import uuid
 from typing import Optional
 
-from fastapi import Depends, Security
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import Depends
 
-from application.config import settings
 from application.container import Container
 from domain.user.registry import UserReadRepository, UserWriteRepository
-from domain.user.schema import (
-    CreateUser,
-    GetUserByUUID,
-    LoginUser,
-    UpdateUser,
-    UserReturnData,
-    UserTokenResult,
-)
+from domain.user.schema import CreateUser, GetUserByUUID, LoginUser, UpdateUser, UserReturnData, UserTokenResult
 from infrastructure.auth.token_handler import AuthHandler
 from infrastructure.base_entities.base_model import BaseResultModel
 from infrastructure.broker.kafka import KafkaProducer
-from infrastructure.database.models import User
-from infrastructure.exceptions.token_exceptions import (
-    InvalidRefreshToken,
-    SessionExpired,
-    Unauthorized,
-)
+from infrastructure.config.config import settings
+from infrastructure.exceptions.token_exceptions import Unauthorized
 from infrastructure.exceptions.user_exceptions import UserNotFound, WrongPassword
 
 
@@ -57,7 +43,7 @@ class AuthService:
             data_dict["user_uuid"] = str(created_user.uuid)
             data_dict["event_type"] = "create"
             asyncio.create_task(
-                self.kafka_repo.send_message(
+                self.kafka_repo.transactional_send_message(
                     message=data_dict,
                     topic=settings.KAFKA.topics.register_topic,
                 ),
@@ -74,7 +60,7 @@ class AuthService:
             data_dict["user_uuid"] = str(updated_user.uuid)
             data_dict["event_type"] = "update"
             asyncio.create_task(
-                self.kafka_repo.send_message(
+                self.kafka_repo.transactional_send_message(
                     message=data_dict,
                     topic=settings.KAFKA.topics.register_topic,
                 ),
@@ -85,7 +71,7 @@ class AuthService:
         if deleted_user := await self.write_repo.delete(user_uuid=user_uuid.uuid):
             data_dict = {"user_uuid": str(deleted_user.uuid), "event_type": "delete"}
             asyncio.create_task(
-                self.kafka_repo.send_message(
+                self.kafka_repo.transactional_send_message(
                     message=data_dict,
                     topic=settings.KAFKA.topics.register_topic,
                 ),

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "auth-service"
-version = "0.0.6"
+version = "0.1.0"
 description = "register\\auth service"
 authors = ["timmashkov <bodomizer@yandex.ru>"]
 license = "Home"
@@ -22,6 +22,9 @@ pyjwt = "^2.9.0"
 email-validator = "^2.2.0"
 redis = "^5.0.8"
 aiokafka = "^0.11.0"
+clickhouse-driver = "^0.2.9"
+fastapi-filters = "^0.2.9"
+pypika = "^0.48.9"
 
 
 [build-system]

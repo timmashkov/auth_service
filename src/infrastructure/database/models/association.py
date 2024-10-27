@@ -21,12 +21,15 @@ class RolePermission(Base):
     __tablename__ = "role_permissions"
     __table_args__ = (
         UniqueConstraint(
-            "permission_uuid", "role_uuid", name="idx_unique_role_permission"
+            "permission_uuid",
+            "role_uuid",
+            name="idx_unique_role_permission",
         ),
         {"extend_existing": True},
     )
 
     permission_uuid: Mapped[UUID] = mapped_column(
-        ForeignKey("permissions.uuid"), primary_key=True
+        ForeignKey("permissions.uuid"),
+        primary_key=True,
     )
     role_uuid: Mapped[UUID] = mapped_column(ForeignKey("roles.uuid"), primary_key=True)

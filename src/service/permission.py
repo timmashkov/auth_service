@@ -3,15 +3,8 @@ from typing import List, Optional
 from fastapi import Depends
 
 from application.container import Container
-from domain.permission.registry import (
-    PermissionReadRepository,
-    PermissionWriteRepository,
-)
-from domain.permission.schema import (
-    CreatePermission,
-    GetPermissionByUUID,
-    PermissionReturnData,
-)
+from domain.permission.registry import PermissionReadRepository, PermissionWriteRepository
+from domain.permission.schema import CreatePermission, GetPermissionByUUID, PermissionReturnData
 
 
 class PermissionService:

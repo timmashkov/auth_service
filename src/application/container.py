@@ -1,16 +1,14 @@
 from redis.asyncio import Redis
 
-from application.config import settings
-from domain.permission.registry import (
-    PermissionReadRepository,
-    PermissionWriteRepository,
-)
+from domain.permission.registry import PermissionReadRepository, PermissionWriteRepository
 from domain.role.registry import RoleReadRepository, RoleWriteRepository
 from domain.user.registry import UserReadRepository, UserWriteRepository
 from infrastructure.auth.token_handler import AuthHandler
 from infrastructure.base_entities.singleton import OnlyContainer, Singleton
 from infrastructure.broker.kafka import KafkaConsumer, KafkaProducer
+from infrastructure.config.config import settings
 from infrastructure.database.alchemy_gateway import SessionManager
+from infrastructure.database.clickhouse_gateway import ClickHouseManager
 
 
 class Container(Singleton):
@@ -30,6 +28,15 @@ class Container(Singleton):
         port=settings.POSTGRES.port,
         database=settings.POSTGRES.database,
         echo=settings.POSTGRES.echo,
+    )
+
+    clickhouse_manager = OnlyContainer(
+        ClickHouseManager,
+        host=settings.CLICKHOUSE.host,
+        user=settings.CLICKHOUSE.user,
+        password=settings.CLICKHOUSE.password,
+        port=settings.CLICKHOUSE.port,
+        database=settings.CLICKHOUSE.database,
     )
 
     user_read_repository = OnlyContainer(
@@ -80,12 +87,14 @@ class Container(Singleton):
         port=settings.KAFKA.port,
         topics=settings.KAFKA.topics,
         logging_config=settings.LOG_LEVEL,
+        acks=settings.KAFKA.acks,
+        transactional_id=settings.KAFKA.transactional_id,
     )
 
     consumer_client = OnlyContainer(
         KafkaConsumer,
         host=settings.KAFKA.host,
         port=settings.KAFKA.port,
-        topics=settings.KAFKA.topics,
+        topics=[settings.KAFKA.topics.register_topic],
         logging_config=settings.LOG_LEVEL,
     )

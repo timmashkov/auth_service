@@ -9,8 +9,8 @@ Create Date: 2023-11-17 15:37:01.431174
 import sqlalchemy as sa
 from alembic import op
 
-from application.config import settings
 from application.container import Container
+from infrastructure.config.config import settings
 from infrastructure.database.models import Role, User
 
 # revision identifiers, used by Alembic.

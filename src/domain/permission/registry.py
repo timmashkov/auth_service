@@ -7,10 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from domain.permission.schema import CreatePermission, PermissionReturnData
-from infrastructure.base_entities.abs_repository import (
-    AbstractReadRepository,
-    AbstractWriteRepository,
-)
+from infrastructure.base_entities.abs_repository import AbstractReadRepository, AbstractWriteRepository
 from infrastructure.database.alchemy_gateway import SessionManager
 from infrastructure.database.models import Permission
 from infrastructure.exceptions.user_exceptions import UserAlreadyExists

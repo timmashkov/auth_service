@@ -2,10 +2,7 @@ from typing import Any, Union
 
 from orjson import dumps, loads
 
-from infrastructure.exceptions.mq_exceptions import (
-    DeserializationError,
-    SerializationError,
-)
+from infrastructure.exceptions.mq_exceptions import DeserializationError, SerializationError
 
 
 class BaseMQ:
